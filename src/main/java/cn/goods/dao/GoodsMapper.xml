@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.goods.dao.GoodsMapper">
+
+    <resultMap id="detailMap" type="cn.goods.entity.GoodsDetail">
+        <!--property实体类里的属性  column对应数据库里面的列名-->
+        <result property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="address" column="address"/>
+        <result property="price" column="price"/>
+        <result property="createDate" column="createDate"/>
+        <result property="remaining" column="remaining"/>
+        <!--配置一对多的映射关系  property属性名   javaType属性的类型  column外键列-->
+        <association property="goodsSort" javaType="GoodsSort" column="sortId">
+            <result property="name" column="sname"/>
+        </association>
+    </resultMap>
+
+    <!--分页查询商品详情列表信息-->
+    <select id="queryGoodsDetailPageList" resultMap="detailMap">
+        SELECT d.*,s.name sname FROM `goods_detail` d,
+                                     `goods_sort` s WHERE d.sortId = s.id
+        <if test="sortId != null and sortId != 0">
+            and d.sortId = #{sortId}
+        </if>
+        limit #{startPos},#{endPos}
+    </select>
+
+    <!--查询所有商品分类列表信息-->
+    <select id="queryAllGoodsSort" resultType="GoodsSort">
+        SELECT  `id` , `name` FROM `goods_sort`
+    </select>
+
+    <!--查询总记录数-->
+    <select id="queryGoodsDetailCount" resultType="java.lang.Integer">
+        SELECT  COUNT(1) FROM `goods_detail`
+            <where>
+                <if test="sortId != null and sortId != 0">
+                    sortId = #{sortId}
+                </if>
+            </where>
+    </select>
+
+    <!--通过goods_detail表中的id查询商品的详情信息-->
+    <select id="queryGoodsDetailById" resultMap="detailMap">
+        SELECT d.*,s.name sname FROM `goods_detail` d,
+        `goods_sort` s WHERE d.sortId = s.id
+        <if test="id != null and id != 0">
+            and d.id = #{id}
+        </if>
+    </select>
+
+    <!--修改商品详情信息-->
+    <update id="updateGoodsDetail" parameterType="GoodsDetail">
+        UPDATE `goods_detail`
+        <set>
+            <if test="sortId != null and sortId != 0">
+                `sortId` = #{sortId},
+            </if>
+            <if test="name != null and name != 0">
+                `name` = #{name},
+            </if>
+            <if test="address != null and address != 0">
+                `address` = #{address},
+            </if>
+            <if test="price != null and price != 0">
+                `price` = #{price},
+            </if>
+            <if test="createDate != null and createDate != 0">
+                `createDate` = #{createDate},
+            </if>
+            <if test="remaining != null and remaining != 0">
+                `remaining` = #{remaining},
+            </if>
+        </set>
+        WHERE `id` = #{id}
+    </update>
+
+
+</mapper>
